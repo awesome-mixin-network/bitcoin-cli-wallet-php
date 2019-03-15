@@ -24,10 +24,13 @@ As you know, we introduce you the **mixin-sdk-php** in [Chapter 1](https://githu
 ExinCore can exchange between Bitcoin, USDT, EOS, Eth etc. Here show you how to exchange between USDT and Bitcoin,
 Check the wallet's balance before you make order.
 ```php
-  $mixinSdk_eachAccountInstance = new MixinSDK(GenerateConfigByCSV($data));
-  $asset_info = $mixinSdk_eachAccountInstance->Wallet()->readAsset(BTC_ASSET_ID);
-  print_r("Bitcoin wallet address is :".$asset_info["public_key"]."\n");
-  print_r("Bitcoin wallet balance is :".$asset_info["balance"]."\n");
+$mixinSdk_BotInstance = new MixinSDK(require './config.php');
+if ($line == 'b') {
+  $asset_info = $mixinSdk_BotInstance->Wallet()->readAsset(BTC_ASSET_ID);
+  print_r("Bot Bitcoin wallet balance is :".$asset_info["balance"]."\n");
+  $asset_info = $mixinSdk_BotInstance->Wallet()->readAsset(USDT_ASSET_ID);
+  print_r("Bot USDT wallet balance is :".$asset_info["balance"]."\n");
+}
 ```
 #### Read market price
 How to check the coin's price? You need understand what is the base coin. If you want buy Bitcoin and sell USDT, the USDT is the base coin. If you want buy USDT and sell Bitcoin, the Bitcoin is the base coin.
