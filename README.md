@@ -50,7 +50,7 @@ EOF
     ,  //import your private_key
 ];
 ```
-Create a new Bitcoin wallet, then write it two mybitcoin_wallet.csv!
+Create a new Bitcoin wallet, then save it to mybitcoin_wallet.csv!
 ```php
 $mixinSdk_BotInstance = new MixinSDK(require './config.php');
 $wallet_info = $mixinSdk_BotInstance->Network()->createUser("My Bitcoin Wallet");
@@ -69,11 +69,11 @@ foreach ($csvary as $fields) {
 }
 fclose($fp);
 ```
-For the wallet's safety, set the file mybitcoin_wallet.csv read only!
+For the wallet's safety, set the file **mybitcoin_wallet.csv** read only!
 ```bash
 $ chmod 400 mybitcoin_wallet.csv
 $ ls -la mybitcoin_wallet.csv
--rw-------  1 wenewzhang  staff  1173 Mar 15 17:05 mybitcoin_wallet.csv
+-r--------  1 wenewzhang  staff  1173 Mar 15 17:05 mybitcoin_wallet.csv
 
 ```
 
