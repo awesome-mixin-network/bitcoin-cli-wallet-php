@@ -31,7 +31,7 @@ const AMOUNT          = "0.0001";
 // |ZEC|c996abc9-d94e-4494-b1cf-2a3fd3ac5714
 // |BCH|fd11b6e3-0b87-41f1-a41f-f0e9b49e5bf0
 
-$msg  = "1 : Create Bitcoin Wallet and update PIN\n2 : Read Bitcoin balance & address \n3 : Read USDT balance & address \n6 : Transfer Bitcoin from bot to new user\n";
+$msg  = "1 : Create Bitcoin Wallet and update PIN\n2 : Read Bitcoin balance & address \n3 : Read USDT balance & address \n";
 $msg .= "qu: Read market price(USDT)\nqb: Read market price(BTC)\nb : Balance of  bot (USDT & BTC)\n";
 $msg .= "s : Read Snapshots \ntb: Transfer 0.0001 BTC buy USDT\ntu: Transfer $1 USDT buy BTC\n";
 $msg .= "q : Exit \nMake your choose:";
@@ -88,38 +88,6 @@ while (true) {
     }
       fclose($handle);
     } else print("Create user first\n");
-  }
-  if ($line == '6') {
-    if (($handle   = fopen("new_users.csv", "r")) !== FALSE) {
-    while (($data  = fgetcsv($handle, 1000, ",")) !== FALSE) {
-      $new_user_id = $data[3];
-      $trans_info  = $mixinSdk_BotInstance->Wallet()->transfer(BTC_ASSET_ID,
-                                               $new_user_id,
-                                               $mixinSdk_BotInstance->getConfig()['default']['pin'],
-                                               AMOUNT);
-      print_r($trans_info);
-    }
-      fclose($handle);
-    } else print("Create user first\n");
-  }
-  if ($line == '7') {
-    $userInfo = $mixinSdk_BotInstance->Network()->readUser(MASTER_ID);
-    if (isset($userInfo["user_id"])) {
-      if (($handle  = fopen("new_users.csv", "r")) !== FALSE) {
-      while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
-          $mixinSdk_eachAccountInstance = new MixinSDK(GenerateConfigByCSV($data));
-          $asset_info = $mixinSdk_eachAccountInstance->Wallet()->readAsset(BTC_ASSET_ID);
-          if ( (float) $asset_info["balance"] > 0 ) {
-            $trans_info = $mixinSdk_eachAccountInstance->Wallet()->transfer(BTC_ASSET_ID,
-                                                      $userInfo["user_id"],
-                                                      $mixinSdk_eachAccountInstance->getConfig()['default']['pin'],
-                                                      $asset_info["balance"]);
-            print_r($trans_info);
-          } else print($data[3] . " has no coins!\n");
-      }
-        fclose($handle);
-      } else print("Create user first\n");
-    } else print("Can not find this user id by Mixin ID!");
   }
   if ($line == 's') {
     $limit        = 20;

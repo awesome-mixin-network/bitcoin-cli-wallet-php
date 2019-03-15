@@ -1,10 +1,6 @@
 <?php
 return [
-    'mixin_id'      => '7000101716',
     'client_id'     => 'a1ce2967-a534-417d-bf12-c86571e4eefa',
-    'client_secret' => 'f8e0241bc76461a6032a7a80f9c8b9b10303308cbf772b218bbad2a819c62556',
-    'pin'           => '806669',
-    'pin_token'     => 'H8U9BJly4EjN5d/LPUjjXbgHOJDzqyHHa/Os9hT6g5P06Xl475XlsL7KB0Lj15jpBL3SLlgDEiz3+drchsX8fPfEeido8hgnmZJJRkAW+S2p5AdTShWQmpi03fdbkK4ARqOpBIRXu9l8RJl17I4N4ZNsx09O2p2EfbQDDjaVDVg=',
     'session_id'    => 'fe4ff62a-ce5a-4db3-9f53-3f365a260541',
     'private_key'   => <<<EOF
 -----BEGIN RSA PRIVATE KEY-----
