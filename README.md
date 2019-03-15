@@ -19,6 +19,63 @@ As you know, we introduce you the **mixin-sdk-php** in [Chapter 1](https://githu
   composer require ramsey/uuid
   composer require rybakit/msgpack
 ```
+### Generate parameter of your app in dashboard
+After app is created in dashboard, you still need to [generate parameter](https://mixin-network.gitbook.io/mixin-network/mixin-messenger-app/create-bot-account#generate-secure-parameter-for-your-app)
+and write down required content, these content will be written into config.php file.
+
+#### Create Bitcoin wallet
+The config.php contents like below:
+```php
+<?php
+return [
+    'client_id'     => 'a1ce2967-a534-417d-bf12-c86571e4eefa',
+    'session_id'    => 'fe4ff62a-ce5a-4db3-9f53-3f365a260541',
+    'private_key'   => <<<EOF
+-----BEGIN RSA PRIVATE KEY-----
+MIICXAIBAAKBgQCEvNjdA/Vk/yn2l0fHU/+IvOp8iYWnIEl//tGRS0tLFjF/Dtm5
++a6PtEx33nhGuiyLA4kDEBIEECOfD5nLy099CRzKiVjMbl1b11M/oNm1MJdmWjSg
+umKrvBCac8oLPLdnb+xnqTZofrF84UbZjuZ4EGMyEs5Daw0NUPE1tJaA2wIDAQAB
+AoGAd3cgF4tAiS2+LtnpGFVZX0/oGz4KtGgyvqgxJXuGwIWw9pH/E4rMuTmkuR3Z
+Uo6tGFCON9t224FLDhWUbf8GAk5Uj/+WXiWVKmHsKtn93axkRhkxuXrv+REWOE6J
+6XdGb5K6Fx2ud2HZ1L/CEADCoDLCq4OjFG7ey4c/fIycpkECQQDFzEsTQgogMYlX
+iBQMP6l075AQuhC5o1VKlOgO1/7Irbq1M4P2GxQNFGVvyUE74yQSM/FAhCCHfac3
+1wLbvYuXAkEAq8uyPZHbFEbEIOgbaImN/1qJY+/oqSyNriT1APkqnvQnDCLrlRVV
++FyV5C4eeZyVa00WFj7IOSJUMLwEnYDtXQJBAI449eZz/rnlRH7Wzqt7/wmg07Lj
+RvFkOwi0hyNdNcrv+CcgUotcLw+0kbdOO4SnLyGTja25E3a458qj5F9CLCMCQCTE
+YY8/yg1a39rTEhqbZeKCs+jJjZe3S1M74Zult/Nw+XJlftnXSSDwX7wICsmoM2pV
+gyabpSplKHONqcczspkCQCDsmsgMP5ETBEDY1tqpa4YEgGB/rzizFuPWlzHm8OzA
+g5w07wY/SeuA4BqDoNIycGK9OewtRlcbJmLLpx3F/DM=
+-----END RSA PRIVATE KEY-----
+EOF
+    ,  //import your private_key
+];
+```
+Create a new Bitcoin wallet, then write it two mybitcoin_wallet.csv!
+```php
+$mixinSdk_BotInstance = new MixinSDK(require './config.php');
+$wallet_info = $mixinSdk_BotInstance->Network()->createUser("My Bitcoin Wallet");
+print_r($wallet_info);
+
+$wallet_Config = array();
+$wallet_Config["private_key"] = $wallet_info["priKey"];
+$wallet_Config["pin_token"]   = $wallet_info["pin_token"];
+$wallet_Config["session_id"]  = $wallet_info["session_id"];
+$wallet_Config["client_id"]   = $wallet_info["user_id"];
+
+$csvary = array($wallet_Config);
+$fp = fopen('mybitcoin_wallet.csv', 'a');
+foreach ($csvary as $fields) {
+    fputcsv($fp, $fields);
+}
+fclose($fp);
+```
+For the wallet's safety, set the file mybitcoin_wallet.csv read only!
+```bash
+$ chmod 400 mybitcoin_wallet.csv
+$ ls -la mybitcoin_wallet.csv
+-rw-------  1 wenewzhang  staff  1173 Mar 15 17:05 mybitcoin_wallet.csv
+
+```
 
 #### Deposit USDT or Bitcoin into your Mixin Network account(bot) and read balance
 ExinCore can exchange between Bitcoin, USDT, EOS, Eth etc. Here show you how to exchange between USDT and Bitcoin,

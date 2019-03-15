@@ -40,22 +40,21 @@ while (true) {
   $line = readline("");
   if ($line != 'q') print("run...\n");
   if ($line == '1') {
-    $tomcat_info = $mixinSdk_BotInstance->Network()->createUser("Tom cat");
-    print_r($tomcat_info);
-    print($tomcat_info["pubKey"]);
+    $wallet_info = $mixinSdk_BotInstance->Network()->createUser("My Bitcoin Wallet");
+    print_r($wallet_info);
 
-    $tomcat_Config = array();
-    $tomcat_Config["private_key"] = $tomcat_info["priKey"];
-    $tomcat_Config["pin_token"]   = $tomcat_info["pin_token"];
-    $tomcat_Config["session_id"]  = $tomcat_info["session_id"];
-    $tomcat_Config["client_id"]   = $tomcat_info["user_id"];
-    $tomcat_Config["pin"]         = PIN;
-    $mixinSdk_tomcat = new MixinSDK($tomcat_Config);
+    $wallet_Config = array();
+    $wallet_Config["private_key"] = $wallet_info["priKey"];
+    $wallet_Config["pin_token"]   = $wallet_info["pin_token"];
+    $wallet_Config["session_id"]  = $wallet_info["session_id"];
+    $wallet_Config["client_id"]   = $wallet_info["user_id"];
+    $wallet_Config["pin"]         = PIN;
+    $mixinSdk_tomcat = new MixinSDK($wallet_Config);
 
     $pinInfo = $mixinSdk_tomcat->Pin()->updatePin('',PIN);
     print_r($pinInfo);
-    $csvary = array($tomcat_Config);
-    $fp = fopen('new_users.csv', 'a');
+    $csvary = array($wallet_Config);
+    $fp = fopen('mybitcoin_wallet.csv', 'a');
     foreach ($csvary as $fields) {
         fputcsv($fp, $fields);
     }
@@ -68,7 +67,7 @@ while (true) {
     print_r("Bot USDT wallet balance is :".$asset_info["balance"]."\n");
   }
   if ($line == '2') {
-    if (($handle = fopen("new_users.csv", "r")) !== FALSE) {
+    if (($handle = fopen("mybitcoin_wallet.csv", "r")) !== FALSE) {
     while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
       $mixinSdk_eachAccountInstance = new MixinSDK(GenerateConfigByCSV($data));
       $asset_info = $mixinSdk_eachAccountInstance->Wallet()->readAsset(BTC_ASSET_ID);
@@ -79,7 +78,7 @@ while (true) {
     } else print("Create user first\n");
   }
   if ($line == '3') {
-    if (($handle = fopen("new_users.csv", "r")) !== FALSE) {
+    if (($handle = fopen("mybitcoin_wallet.csv", "r")) !== FALSE) {
     while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
       $mixinSdk_eachAccountInstance = new MixinSDK(GenerateConfigByCSV($data));
       $asset_info = $mixinSdk_eachAccountInstance->Wallet()->readAsset(USDT_ASSET_ID);
@@ -93,7 +92,7 @@ while (true) {
     $limit        = 20;
     // $offset       = '201-03-10T01:58:25.362528Z';
 
-    $handle  = fopen("new_users.csv", "r");
+    $handle  = fopen("mybitcoin_wallet.csv", "r");
     $newUser = fgetcsv($handle, 1, ",");
     $mixinSdk_eachAccountInstance = new MixinSDK(GenerateConfigByCSV($newUser));
 
@@ -123,7 +122,7 @@ while (true) {
   }
   if ($line == 'tb') {
     try {
-      $handle = fopen("new_users.csv", "r");
+      $handle = fopen("mybitcoin_wallet.csv", "r");
       $data = fgetcsv($handle, 1, ",");
       coinExchange(GenerateConfigByCSV($data),BTC_ASSET_ID,"0.0001",USDT_ASSET_ID);
       fclose($handle);
@@ -133,7 +132,7 @@ while (true) {
   }
   if ($line == 'tu') {
     try {
-      $handle = fopen("new_users.csv", "r");
+      $handle = fopen("mybitcoin_wallet.csv", "r");
       $data = fgetcsv($handle, 1, ",");
       coinExchange(GenerateConfigByCSV($data),USDT_ASSET_ID,"1",BTC_ASSET_ID);
       fclose($handle);
