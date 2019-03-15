@@ -148,7 +148,7 @@ $asset_info = $mixinSdk->Wallet()->readAsset(USDT_ASSET_ID);
 print_r("USDT wallet balance is :".$asset_info["balance"]."\n");
 ```
 
-[Full source code](https://github.com/wenewzhang/mixin_labs-php-bot/blob/master/call_apis.php)
+[Full source code](https://github.com/awesome-mixin-network/bitcoin-cli-wallet-php/blob/master/bitcoin-cli-wallet.php)
 
 ## Source code usage
 Execute **php call_apis.php** to run it.
