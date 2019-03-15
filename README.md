@@ -11,20 +11,23 @@ ExinCore don't know who you are because ExinCore only know your client's uuid.
 You should already have created a wallet based on Mixin Network. Create one by reading [PHP Bitcoin tutorial](https://github.com/wenewzhang/mixin_labs-php-bot).
 
 #### Install required packages
-As you know, we introduce you the mixin-sdk-php in [chapter 1](https://github.com/wenewzhang/mixin_labs-php-bot/blob/master/README.md), assume it has installed before, let's install **uuid, msgpack** here.
+As you know, we introduce you the **mixin-sdk-php** in [Chapter 1](https://github.com/wenewzhang/mixin_labs-php-bot/blob/master/README.md), assume it has installed before, let's install **uuid, msgpack** here.
+
+- If you are want to know how to install PHP & composer,  [Chapter 1](https://github.com/wenewzhang/mixin_labs-php-bot/blob/master/README.md)
+- If you clone this repository, issue **composer install** to install dependency packages.
 ```bash
   composer require ramsey/uuid
   composer require rybakit/msgpack
 ```
+
 #### Deposit USDT or Bitcoin into your Mixin Network account(bot) and read balance
 ExinCore can exchange between Bitcoin, USDT, EOS, Eth etc. Here show you how to exchange between USDT and Bitcoin,
 Check the wallet's balance before you make order.
 ```php
-  $mixinSdk = new MixinSDK(require './config.php');
-  $asset_info = $mixinSdk->Wallet()->readAsset(BTC_ASSET_ID);
+  $mixinSdk_eachAccountInstance = new MixinSDK(GenerateConfigByCSV($data));
+  $asset_info = $mixinSdk_eachAccountInstance->Wallet()->readAsset(BTC_ASSET_ID);
+  print_r("Bitcoin wallet address is :".$asset_info["public_key"]."\n");
   print_r("Bitcoin wallet balance is :".$asset_info["balance"]."\n");
-  $asset_info = $mixinSdk->Wallet()->readAsset(USDT_ASSET_ID);
-  print_r("USDT wallet balance is :".$asset_info["balance"]."\n");
 ```
 #### Read market price
 How to check the coin's price? You need understand what is the base coin. If you want buy Bitcoin and sell USDT, the USDT is the base coin. If you want buy USDT and sell Bitcoin, the Bitcoin is the base coin.
@@ -70,21 +73,31 @@ const EXIN_BOT        = "61103d28-3ac2-44a2-ae34-bd956070dab1";
 const BTC_ASSET_ID    = "c6d0c728-2624-429b-8e0d-d9d19b6592fa";
 const EOS_ASSET_ID    = "6cfe566e-4aad-470b-8c9a-2fd35b49c68d";
 const USDT_ASSET_ID   = "815b0b1a-2764-3736-8faa-42d694fa620a";
-coinExchange(BTC_ASSET_ID,"0.0001",USDT_ASSET_ID);
 
-//...........
-
-function coinExchange($_assetID,$_amount,$_targetAssetID) {
-  $mixinSdk = new MixinSDK(require './config.php');
-  // print_r();
+function coinExchange ($config, $_assetID, $_amount, $_targetAssetID) {
   $memo = base64_encode(MessagePack::pack([
                        'A' => Uuid::fromString($_targetAssetID)->getBytes(),
                        ]));
-  $BotInfo = $mixinSdk->Wallet()->transfer($_assetID,EXIN_BOT,
-                                           $mixinSdk->getConfig()['default']['pin'],$_amount,$memo);
-  print_r($BotInfo);
+  echo PHP_EOL . $memo . PHP_EOL;
+  // $mixinSdk_eachAccountInstance= new MixinSDK(GenerateConfigByCSV($data));
+  $mixinSdk_eachAccountInstance= new MixinSDK($config);
+  $transInfo = $mixinSdk_eachAccountInstance->Wallet()->transfer($_assetID,
+                EXIN_BOT,$config['pin'],$_amount,$memo);
+  print_r($transInfo);
 }
 ```
+
+If you want sell Bitcoin buy USDT, call it like below:
+```php
+coinExchange($config,BTC_ASSET_ID,"0.0001",USDT_ASSET_ID);
+```
+
+If you want sell USDT buy Bitcoin, call it like below:
+
+```php
+coinExchange($config,USDT_ASSET_ID,"1",BTC_ASSET_ID);
+```
+
 The ExinCore should transfer the target coin to your bot, meanwhile, put the fee, order id, price etc. information in the memo, unpack the data like below.
 - **readUserSnapshots** Read snapshots of the user.
 ```php
@@ -137,20 +150,16 @@ print_r("USDT wallet balance is :".$asset_info["balance"]."\n");
 ## Source code usage
 Execute **php call_apis.php** to run it.
 
-- 1: Create user and update PIN
-- 2: Read Bitcoin balance & address
-- 3: Read USDT balance & address
-- 4: Read EOS balance
-- 5: Read EOS address
-- 6: Transfer Bitcoin from bot to new user
-- 7: Transfer Bitcoin from new user to Master
-- 8: Withdraw bot's Bitcoin
-- qu: Read market price(USDT)
-- qb: Read market price(BTC)
-- b: Balance of  bot (USDT & BTC)
-- s: Read Snapshots
-- tb: Transfer 0.0001 BTC buy USDT
-- tu: Transfer $1 USDT buy BTC
-- q: Exit
+1 : Create Bitcoin Wallet and update PIN
+2 : Read Bitcoin balance & address
+3 : Read USDT balance & address
+6 : Transfer Bitcoin from bot to new user
+qu: Read market price(USDT)
+qb: Read market price(BTC)
+b : Balance of  bot (USDT & BTC)
+s : Read Snapshots
+tb: Transfer 0.0001 BTC buy USDT
+tu: Transfer $1 USDT buy BTC
+q : Exit
 
 ## Solution Two: List your order on Ocean.One exchange

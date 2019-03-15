@@ -31,10 +31,10 @@ const AMOUNT          = "0.0001";
 // |ZEC|c996abc9-d94e-4494-b1cf-2a3fd3ac5714
 // |BCH|fd11b6e3-0b87-41f1-a41f-f0e9b49e5bf0
 
-$msg  = "1: Create Bitcoin Wallet and update PIN\n2: Read Bitcoin balance & address \n3: Read USDT balance & address \n6: Transfer Bitcoin from bot to new user\n";
-$msg .= "qu: Read market price(USDT)\nqb: Read market price(BTC)\nb: Balance of  bot (USDT & BTC)\n";
-$msg .= "s: Read Snapshots \ntb: Transfer 0.0001 BTC buy USDT\ntu: Transfer $1 USDT buy BTC\n";
-$msg .= "q: Exit \nMake your choose:";
+$msg  = "1 : Create Bitcoin Wallet and update PIN\n2 : Read Bitcoin balance & address \n3 : Read USDT balance & address \n6 : Transfer Bitcoin from bot to new user\n";
+$msg .= "qu: Read market price(USDT)\nqb: Read market price(BTC)\nb : Balance of  bot (USDT & BTC)\n";
+$msg .= "s : Read Snapshots \ntb: Transfer 0.0001 BTC buy USDT\ntu: Transfer $1 USDT buy BTC\n";
+$msg .= "q : Exit \nMake your choose:";
 while (true) {
   echo $msg;
   $line = readline("");
@@ -90,11 +90,13 @@ while (true) {
     } else print("Create user first\n");
   }
   if ($line == '6') {
-    if (($handle = fopen("new_users.csv", "r")) !== FALSE) {
-    while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+    if (($handle   = fopen("new_users.csv", "r")) !== FALSE) {
+    while (($data  = fgetcsv($handle, 1000, ",")) !== FALSE) {
       $new_user_id = $data[3];
-      $trans_info = $mixinSdk_BotInstance->Wallet()->transfer(BTC_ASSET_ID,$new_user_id,
-                                               $mixinSdk_BotInstance->getConfig()['default']['pin'],AMOUNT);
+      $trans_info  = $mixinSdk_BotInstance->Wallet()->transfer(BTC_ASSET_ID,
+                                               $new_user_id,
+                                               $mixinSdk_BotInstance->getConfig()['default']['pin'],
+                                               AMOUNT);
       print_r($trans_info);
     }
       fclose($handle);
@@ -103,13 +105,15 @@ while (true) {
   if ($line == '7') {
     $userInfo = $mixinSdk_BotInstance->Network()->readUser(MASTER_ID);
     if (isset($userInfo["user_id"])) {
-      if (($handle = fopen("new_users.csv", "r")) !== FALSE) {
+      if (($handle  = fopen("new_users.csv", "r")) !== FALSE) {
       while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
-          $mixinSdk_eachAccountInstance= new MixinSDK(GenerateConfigByCSV($data));
+          $mixinSdk_eachAccountInstance = new MixinSDK(GenerateConfigByCSV($data));
           $asset_info = $mixinSdk_eachAccountInstance->Wallet()->readAsset(BTC_ASSET_ID);
           if ( (float) $asset_info["balance"] > 0 ) {
-            $trans_info = $mixinSdk_eachAccountInstance->Wallet()->transfer(BTC_ASSET_ID,$userInfo["user_id"],
-                                                     $mixinSdk_eachAccountInstance->getConfig()['default']['pin'],$asset_info["balance"]);
+            $trans_info = $mixinSdk_eachAccountInstance->Wallet()->transfer(BTC_ASSET_ID,
+                                                      $userInfo["user_id"],
+                                                      $mixinSdk_eachAccountInstance->getConfig()['default']['pin'],
+                                                      $asset_info["balance"]);
             print_r($trans_info);
           } else print($data[3] . " has no coins!\n");
       }
@@ -150,28 +154,24 @@ while (true) {
     // echo $marketInfo;
   }
   if ($line == 'tb') {
-    $memo = base64_encode(MessagePack::pack([
-                         'A' => Uuid::fromString(USDT_ASSET_ID)->getBytes(),
-                         ]));
-    echo PHP_EOL . $memo . PHP_EOL;
-    // $mixinSdk_eachAccountInstance= new MixinSDK(GenerateConfigByCSV($data));
-    $handle = fopen("new_users.csv", "r");
-    $data = fgetcsv($handle, 1, ",");
-    $mixinSdk_eachAccountInstance= new MixinSDK(GenerateConfigByCSV($data));
-    $transInfo = $mixinSdk_eachAccountInstance->Wallet()->transfer(BTC_ASSET_ID,EXIN_BOT,PIN,AMOUNT,$memo);
-    fclose($handle);
+    try {
+      $handle = fopen("new_users.csv", "r");
+      $data = fgetcsv($handle, 1, ",");
+      coinExchange(GenerateConfigByCSV($data),BTC_ASSET_ID,"0.0001",USDT_ASSET_ID);
+      fclose($handle);
+    } catch (ArithmeticError | Exception $e) {
+       echo 'Message: ' .$e->getMessage() . PHP_EOL;
+    }
   }
   if ($line == 'tu') {
-    $memo = base64_encode(MessagePack::pack([
-                         'A' => Uuid::fromString(BTC_ASSET_ID)->getBytes(),
-                         ]));
-    echo PHP_EOL . $memo . PHP_EOL;
-    // $mixinSdk_eachAccountInstance= new MixinSDK(GenerateConfigByCSV($data));
-    $handle = fopen("new_users.csv", "r");
-    $data = fgetcsv($handle, 1, ",");
-    $mixinSdk_eachAccountInstance= new MixinSDK(GenerateConfigByCSV($data));
-    $transInfo = $mixinSdk_eachAccountInstance->Wallet()->transfer(USDT_ASSET_ID,EXIN_BOT,PIN,"1",$memo);
-    fclose($handle);
+    try {
+      $handle = fopen("new_users.csv", "r");
+      $data = fgetcsv($handle, 1, ",");
+      coinExchange(GenerateConfigByCSV($data),USDT_ASSET_ID,"1",BTC_ASSET_ID);
+      fclose($handle);
+    } catch (ArithmeticError | Exception $e) {
+       echo 'Message: ' .$e->getMessage() . PHP_EOL;
+    }
   }
   if ($line == 'qb') {
     $marketInfo = getExchangeCoins(BTC_ASSET_ID);
@@ -217,4 +217,15 @@ function getExchangeCoins($base_coin) :string {
     }
   }
   return $result;
+}
+function coinExchange ($config, $_assetID, $_amount, $_targetAssetID) {
+  $memo = base64_encode(MessagePack::pack([
+                       'A' => Uuid::fromString($_targetAssetID)->getBytes(),
+                       ]));
+  echo PHP_EOL . $memo . PHP_EOL;
+  // $mixinSdk_eachAccountInstance= new MixinSDK(GenerateConfigByCSV($data));
+  $mixinSdk_eachAccountInstance= new MixinSDK($config);
+  $transInfo = $mixinSdk_eachAccountInstance->Wallet()->transfer($_assetID,
+                EXIN_BOT,$config['pin'],$_amount,$memo);
+  print_r($transInfo);
 }
