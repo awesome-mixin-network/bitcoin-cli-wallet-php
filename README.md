@@ -221,6 +221,8 @@ Execute **php call_apis.php** to run it.
 - s : Read Snapshots
 - tb: Transfer 0.0001 BTC buy USDT
 - tu: Transfer $1 USDT buy BTC
+- we: Withdrawal EOS
+- wb: Withdrawal BTC
 - q : Exit
 
 [Full source code](https://github.com/awesome-mixin-network/bitcoin-cli-wallet-php/blob/master/bitcoin-cli-wallet.php)
