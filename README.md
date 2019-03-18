@@ -80,16 +80,37 @@ $ ls -la mybitcoin_wallet.csv
 
 ```
 
-#### Deposit USDT or Bitcoin into your Mixin Network account(bot) and read balance
+#### Deposit USDT or Bitcoin into your Mixin Network account and read balance
 ExinCore can exchange between Bitcoin, USDT, EOS, Eth etc. Here show you how to exchange between USDT and Bitcoin,
-Check the wallet's balance before you make order.
+Check the wallet's balance & address before you make order.
+
+- Check the address & balance, remember it Bitcoin wallet address.
+- Deposit Bitcoin to this Bitcoin wallet address.
+- Check Bitcoin balance after 100 minutes later.
+**By the way, Bitcoin & USDT 's address are the same.**
+
 ```php
-$mixinSdk_BotInstance = new MixinSDK(require './config.php');
-if ($line == 'b') {
-  $asset_info = $mixinSdk_BotInstance->Wallet()->readAsset(BTC_ASSET_ID);
-  print_r("Bot Bitcoin wallet balance is :".$asset_info["balance"]."\n");
-  $asset_info = $mixinSdk_BotInstance->Wallet()->readAsset(USDT_ASSET_ID);
-  print_r("Bot USDT wallet balance is :".$asset_info["balance"]."\n");
+if ($line == '2') {
+  if (($handle = fopen("new_users.csv", "r")) !== FALSE) {
+  while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+    $mixinSdk_eachAccountInstance = new MixinSDK(GenerateConfigByCSV($data));
+    $asset_info = $mixinSdk_eachAccountInstance->Wallet()->readAsset(BTC_ASSET_ID);
+    print_r("Bitcoin wallet address is :".$asset_info["public_key"]."\n");
+    print_r("Bitcoin wallet balance is :".$asset_info["balance"]."\n");
+  }
+    fclose($handle);
+  } else print("Create user first\n");
+}
+if ($line == '3') {
+  if (($handle = fopen("new_users.csv", "r")) !== FALSE) {
+  while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+    $mixinSdk_eachAccountInstance = new MixinSDK(GenerateConfigByCSV($data));
+    $asset_info = $mixinSdk_eachAccountInstance->Wallet()->readAsset(USDT_ASSET_ID);
+    print_r("USDT wallet address is :".$asset_info["public_key"]."\n");
+    print_r("USDT wallet balance is :".$asset_info["balance"]."\n");
+  }
+    fclose($handle);
+  } else print("Create user first\n");
 }
 ```
 #### Read market price
