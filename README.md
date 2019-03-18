@@ -70,6 +70,9 @@ foreach ($csvary as $fields) {
 fclose($fp);
 ```
 For the wallet's safety, set the file **mybitcoin_wallet.csv** read only!
+
+- **chmod 400 mybitcoin_wallet.csv** Set mybitcoin_wallet.csv read only!
+
 ```bash
 $ chmod 400 mybitcoin_wallet.csv
 $ ls -la mybitcoin_wallet.csv
@@ -205,21 +208,21 @@ $asset_info = $mixinSdk->Wallet()->readAsset(USDT_ASSET_ID);
 print_r("USDT wallet balance is :".$asset_info["balance"]."\n");
 ```
 
-[Full source code](https://github.com/awesome-mixin-network/bitcoin-cli-wallet-php/blob/master/bitcoin-cli-wallet.php)
-
 ## Source code usage
 Execute **php call_apis.php** to run it.
 
-1 : Create Bitcoin Wallet and update PIN
-2 : Read Bitcoin balance & address
-3 : Read USDT balance & address
-6 : Transfer Bitcoin from bot to new user
-qu: Read market price(USDT)
-qb: Read market price(BTC)
-b : Balance of  bot (USDT & BTC)
-s : Read Snapshots
-tb: Transfer 0.0001 BTC buy USDT
-tu: Transfer $1 USDT buy BTC
-q : Exit
+- 1 : Create Bitcoin Wallet and update PIN
+- 2 : Read Bitcoin balance & address
+- 3 : Read USDT balance & address
+- 6 : Transfer Bitcoin from bot to new user
+- qu: Read market price(USDT)
+- qb: Read market price(BTC)
+- b : Balance of  bot (USDT & BTC)
+- s : Read Snapshots
+- tb: Transfer 0.0001 BTC buy USDT
+- tu: Transfer $1 USDT buy BTC
+- q : Exit
+
+[Full source code](https://github.com/awesome-mixin-network/bitcoin-cli-wallet-php/blob/master/bitcoin-cli-wallet.php)
 
 ## Solution Two: List your order on Ocean.One exchange
