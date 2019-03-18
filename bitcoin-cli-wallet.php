@@ -13,8 +13,14 @@ const EXIN_BOT        = "61103d28-3ac2-44a2-ae34-bd956070dab1";
 const BTC_ASSET_ID    = "c6d0c728-2624-429b-8e0d-d9d19b6592fa";
 const EOS_ASSET_ID    = "6cfe566e-4aad-470b-8c9a-2fd35b49c68d";
 const USDT_ASSET_ID   = "815b0b1a-2764-3736-8faa-42d694fa620a";
-const BTC_WALLET_ADDR = "14T129GTbXXPGXXvZzVaNLRFPeHXD1C25C";
 const AMOUNT          = "0.0001";
+
+// Change to the cold wallet address or third exchange wallet address  your own!
+const BTC_WALLET_ADDR = "14T129GTbXXPGXXvZzVaNLRFPeHXD1C25C";
+const EOS_THIRD_EXCHANGE_NAME
+                      = "huobideposit";
+const EOS_THIRD_EXCHANGE_TAG
+                      = "1872050";
 // Mixin Network support cryptocurrencies (2019-02-19)
 // |EOS|6cfe566e-4aad-470b-8c9a-2fd35b49c68d
 // |CNB|965e5c6e-434c-3fa9-b780-c50f43cd955c
@@ -32,8 +38,10 @@ const AMOUNT          = "0.0001";
 // |BCH|fd11b6e3-0b87-41f1-a41f-f0e9b49e5bf0
 
 $msg  = "1 : Create Bitcoin Wallet and update PIN\n2 : Read Bitcoin balance & address \n3 : Read USDT balance & address \n";
-$msg .= "qu: Read market price(USDT)\nqb: Read market price(BTC)\nb : Balance of  bot (USDT & BTC)\n";
+$msg .= "4 : Read EOS balance & address\n";
+$msg .= "qu: Read market price(USDT)\nqb: Read market price(BTC)\nb : Balance of  bot (USDT & BTC & EOS)\n";
 $msg .= "s : Read Snapshots \ntb: Transfer 0.0001 BTC buy USDT\ntu: Transfer $1 USDT buy BTC\n";
+$msg .= "we: Withdrawal EOS\nwb: Withdrawal BTC\n";
 $msg .= "q : Exit \nMake your choose:";
 while (true) {
   echo $msg;
@@ -65,6 +73,8 @@ while (true) {
     print_r("Bot Bitcoin wallet balance is :".$asset_info["balance"]."\n");
     $asset_info = $mixinSdk_BotInstance->Wallet()->readAsset(USDT_ASSET_ID);
     print_r("Bot USDT wallet balance is :".$asset_info["balance"]."\n");
+    $asset_info = $mixinSdk_BotInstance->Wallet()->readAsset(EOS_ASSET_ID);
+    print_r("Bot EOS wallet balance is :".$asset_info["balance"]."\n");
   }
   if ($line == '2') {
     if (($handle = fopen("mybitcoin_wallet.csv", "r")) !== FALSE) {
@@ -73,6 +83,7 @@ while (true) {
       $asset_info = $mixinSdk_eachAccountInstance->Wallet()->readAsset(BTC_ASSET_ID);
       print_r("Bitcoin wallet address is :".$asset_info["public_key"]."\n");
       print_r("Bitcoin wallet balance is :".$asset_info["balance"]."\n");
+      echo "You can deposit Bitcoin to your wallet this way!\n";
     }
       fclose($handle);
     } else print("Create user first\n");
@@ -84,6 +95,19 @@ while (true) {
       $asset_info = $mixinSdk_eachAccountInstance->Wallet()->readAsset(USDT_ASSET_ID);
       print_r("USDT wallet address is :".$asset_info["public_key"]."\n");
       print_r("USDT wallet balance is :".$asset_info["balance"]."\n");
+      echo "You can deposit USDT to your wallet this way!\n";
+    }
+      fclose($handle);
+    } else print("Create user first\n");
+  }
+  if ($line == '4') {
+    if (($handle = fopen("mybitcoin_wallet.csv", "r")) !== FALSE) {
+    while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+      $mixinSdk_eachAccountInstance = new MixinSDK(GenerateConfigByCSV($data));
+      $asset_info = $mixinSdk_eachAccountInstance->Wallet()->readAsset(EOS_ASSET_ID);
+      print_r("EOS wallet name is :".$asset_info["account_name"]."\n address: ".$asset_info["account_tag"]."\n");
+      print_r("EOS wallet balance is :".$asset_info["balance"]."\n");
+      echo "You can deposit EOS to your wallet this way!\n";
     }
       fclose($handle);
     } else print("Create user first\n");
@@ -135,6 +159,67 @@ while (true) {
       $handle = fopen("mybitcoin_wallet.csv", "r");
       $data = fgetcsv($handle, 1, ",");
       coinExchange(GenerateConfigByCSV($data),USDT_ASSET_ID,"1",BTC_ASSET_ID);
+      fclose($handle);
+    } catch (ArithmeticError | Exception $e) {
+       echo 'Message: ' .$e->getMessage() . PHP_EOL;
+    }
+  }
+  if ($line == 'we') {
+    try {
+      $handle = fopen("mybitcoin_wallet.csv", "r");
+      $newUser = fgetcsv($handle, 1, ",");
+      $mixinSdk_eachAccountInstance = new MixinSDK(GenerateConfigByCSV($newUser));
+      $wdInfo = $mixinSdk_eachAccountInstance->Wallet()->createAddress(EOS_ASSET_ID,
+                                                EOS_THIRD_EXCHANGE_TAG,
+                                                $mixinSdk_eachAccountInstance->getConfig()['default']['pin'],
+                                                EOS_THIRD_EXCHANGE_NAME,true);
+      // coinExchange(GenerateConfigByCSV($data),USDT_ASSET_ID,"1",BTC_ASSET_ID);
+      print("EOS winthdrawal fee is:".$wdInfo["fee"]."\n");
+      $asset_info = $mixinSdk_eachAccountInstance->Wallet()->readAsset(EOS_ASSET_ID);
+      $wdAmount = (float) $asset_info["balance"] - (float) $wdInfo["fee"];
+      echo "EOS withdraw amount is: " . $wdAmount . PHP_EOL;
+      if ( $wdAmount > 0 ) {
+        echo "Are you deposit EOS " . floatval($wdAmount). " to " . EOS_THIRD_EXCHANGE_NAME . " " . EOS_THIRD_EXCHANGE_TAG . "(y/n)";
+        $cmd = readline("");
+        if ($cmd == 'y' ) {
+          $wdInfo = $mixinSdk_eachAccountInstance->Wallet()->withdrawal($wdInfo["address_id"],
+                                      floatval($wdAmount),
+                                      $mixinSdk_eachAccountInstance->getConfig()['default']['pin'],
+                                      "eos withdraw");
+          print_r($wdInfo);
+        }
+      } else echo "Not Enough asset to withdraw!" . PHP_EOL.
+      fclose($handle);
+    } catch (ArithmeticError | Exception $e) {
+       echo 'Message: ' .$e->getMessage() . PHP_EOL;
+    }
+  }
+  if ($line == 'wb') {
+    try {
+      $handle = fopen("mybitcoin_wallet.csv", "r");
+      $newUser = fgetcsv($handle, 1, ",");
+      $mixinSdk_eachAccountInstance = new MixinSDK(GenerateConfigByCSV($newUser));
+      $wdInfo = $mixinSdk_eachAccountInstance->Wallet()->createAddress(BTC_ASSET_ID,
+                                                BTC_WALLET_ADDR,
+                                                $mixinSdk_eachAccountInstance->getConfig()['default']['pin'],
+                                                "BTC withdraw",false);
+      // coinExchange(GenerateConfigByCSV($data),USDT_ASSET_ID,"1",BTC_ASSET_ID);
+      print("Bitcoin winthdrawal fee is:".$wdInfo["fee"]."\n");
+      $asset_info = $mixinSdk_eachAccountInstance->Wallet()->readAsset(BTC_ASSET_ID);
+      echo "Balance is " .$asset_info["balance"] . PHP_EOL;
+      $wdAmount = (float) $asset_info["balance"] - (float) $wdInfo["fee"];
+      echo "Bitcoin withdraw amount is: " . $wdAmount . PHP_EOL;
+      if ( $wdAmount > 0 ) {
+        echo "Are you deposit Bitcoin " . floatval($wdAmount). " to '" . BTC_WALLET_ADDR  . "' (y/n)";
+        $cmd = readline("");
+        if ($cmd == 'y' ) {
+          $wdInfo = $mixinSdk_eachAccountInstance->Wallet()->withdrawal($wdInfo["address_id"],
+                                      floatval($wdAmount),
+                                      $mixinSdk_eachAccountInstance->getConfig()['default']['pin'],
+                                      "btc withdraw");
+          print_r($wdInfo);
+        }
+      } else echo "Not Enough asset to withdraw!" . PHP_EOL.
       fclose($handle);
     } catch (ArithmeticError | Exception $e) {
        echo 'Message: ' .$e->getMessage() . PHP_EOL;
