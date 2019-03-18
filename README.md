@@ -1,5 +1,7 @@
 # How to trade bitcoin through PHP language
 
+[Chinese](https://github.com/awesome-mixin-network/bitcoin-cli-wallet-php/blob/master/README-zhchs.md)
+
 ## Solution One: pay to ExinCore API
 [Exincore](https://github.com/exinone/exincore) provide a commercial trading API on Mixin Network.
 
